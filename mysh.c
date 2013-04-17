@@ -37,6 +37,9 @@ int main()
          freelist(arglist);
       }
       free(cmdline);
+
+      // Recalculate the prompt, for escape characters.
+      prompt = parseEscapes(promptStr);
    }
    return 0;
 }

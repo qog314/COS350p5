@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <signal.h>
 #include <sys/wait.h>
@@ -30,7 +31,7 @@ int execute(char *argv[])
       else exitShell(atoi(argv[1]));
    }
 
-   if  (strcmp(argv[0], CD) == 0){
+   if (strcmp(argv[0], CD) == 0){
       if (argv[1] == NULL) changedir("~");
       else changedir(argv[1]);
       return 0;
@@ -45,7 +46,7 @@ int execute(char *argv[])
       signal(SIGQUIT, SIG_DFL);
       execvp(argv[0], argv);
       perror("cannot execute command");
-      return -1;
+      exitShell(1);
    }
    else {
       if ( waitpid(pid, &child_info, 0) == -1 )
@@ -56,6 +57,38 @@ int execute(char *argv[])
 
 void changedir(char* dir)
 {
-   // TODO change directory.
-   printf("Would have changed to %s\n", dir);
+   char* buf;
+   int dirlen = strlen(dir);
+
+   // Test for home
+   if (dir[0] == '~'){
+      char* home = getenv("HOME");
+      int homelen =  strlen(home);
+      int buflen = homelen+dirlen;
+      buf = malloc(buflen + 1);
+      memcpy(buf, home, homelen);
+      memcpy(&buf[homelen], &dir[1], dirlen);
+   }
+   else if (dir[0] != '/'){
+      char* pwd = getcwd(0,0);
+      int pwdlen =  strlen(pwd);
+      buf = malloc(pwdlen + dirlen + 2);
+      memcpy(buf, pwd, pwdlen);
+      buf[pwdlen] = '/';
+      memcpy(&buf[pwdlen + 1], dir, dirlen + 1);
+   } else {
+      buf = malloc(dirlen + 1);
+      memcpy(buf, dir, dirlen + 1);
+   }
+
+   // Get real path.
+   char* path = realpath(buf, NULL);
+   free(buf);
+
+   // Change directory.
+   if (chdir(path) != 0){
+      printf("Could not change directory.\n");
+   }
+
+   free(path);
 }

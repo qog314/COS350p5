@@ -101,7 +101,7 @@ char* parseEscapes(char *string)
          case 'w': // Working directory
          case 'W':
             if (currchar == 'W')
-               tempstr = get_current_dir_name();
+               tempstr = getcwd(0,0);
             else
                tempstr = getPathFromHome();
 
@@ -162,8 +162,8 @@ char* getHostNameShort()
 
 char* getPathFromHome()
 {
-   char* dir = get_current_dir_name();
-   char* home = getenv("HOME");
+   char* dir = getcwd(0,0);
+   char* home = realpath(getenv("HOME"),NULL);
    int homelen = strlen(home);
    int dirlen = strlen(dir);
 
@@ -171,6 +171,7 @@ char* getPathFromHome()
       int i = 0;
       while (i < homelen){
          if (home[i] != dir[i]){
+            free(home);
             return dir;
          }
          i++;
@@ -182,6 +183,6 @@ char* getPathFromHome()
       memmove(&dir[1],&dir[i],remaining);
       dir[remaining + 1] = 0;
    }
-
+   free(home);
    return dir;
 }
