@@ -12,21 +12,42 @@
 #include "mysh.h"
 #include "parseEscapes.h"
 
-#define  DFL_PROMPT "\\033[1;34mShell\\033[0m \\h > "
+#define  DFL_PROMPT "\\033[1;33m\\u@\\h\\033[0m:\\033[1;34m\\w\\033[0m\\$ "
+#define  FORCE_DFL_PROMPT 0
+#define  DISPLAY_WARN 1
+#define  WARN_MSG "[\\033[1;31mMYSH\\033[0m] "
 
 int main()
 {
-   char	*cmdline, *prompt, **arglist;
+   char	*cmdline, *prompt, *promptStr, **arglist;
    int	result;
    void	setup();
 
-   char* promptStr  = getenv("PS1");
-   if (promptStr == NULL)
+   char* env  = getenv("PS1");
+   if (FORCE_DFL_PROMPT || env == NULL)
    {
       promptStr = malloc(strlen(DFL_PROMPT) + 1);
       strcpy(promptStr, DFL_PROMPT);
    }
-   // TODO Add warning flag, to prevent confusion.
+   else {
+      int envlen = strlen(env);
+      promptStr = malloc(envlen + 1);
+      memcpy(promptStr, env, envlen + 1);
+   }
+
+   // Add warning flag, to prevent confusion.
+   if (DISPLAY_WARN){
+      int warnlen = strlen(WARN_MSG);
+      int promptlen = strlen(promptStr);
+      char* temp = malloc(warnlen + promptlen + 1);
+      temp[0] = '\0';
+      strcat(temp, WARN_MSG);
+      strcat(temp, promptStr);
+      free(promptStr);
+      promptStr = temp;
+   }
+
+   // Parse prompt the first time.
    prompt = parseEscapes(promptStr);
 
    setup();
@@ -38,7 +59,7 @@ int main()
       }
       free(cmdline);
 
-      // Recalculate the prompt, for escape characters.
+      // Reparse the prompt, for escape characters such as \h.
       prompt = parseEscapes(promptStr);
    }
    return 0;

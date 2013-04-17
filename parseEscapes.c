@@ -13,6 +13,7 @@
 int expandBuffer(char**, int, int);
 char* getHostName();
 char* getHostNameShort();
+char* getUserName();
 char* getPathFromHome();
 
 /* parseEscapes:
@@ -112,6 +113,15 @@ char* parseEscapes(char *string)
             currchar = tempstr[templen - 1];
             free(tempstr);
             break;
+
+         case 'u': // Username
+            tempstr = getUserName();
+            templen = strlen(tempstr);
+            buflen = expandBuffer(&buf, buflen, templen);
+            memcpy(&buf[writeindex], tempstr, templen);
+            writeindex += templen - 1;
+            currchar = tempstr[templen - 1];
+            break;
          }
       }
 
@@ -158,6 +168,14 @@ char* getHostNameShort()
    }while (currchar != 0 && currchar != '.');
    hostname[i] = 0;
    return hostname;
+}
+
+char* getUserName()
+{
+   char* username = getenv("USER");
+   if (username == NULL)
+      username = "";
+   return username;
 }
 
 char* getPathFromHome()
