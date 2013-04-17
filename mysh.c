@@ -8,9 +8,11 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <signal.h>
+#include <string.h>
 #include "mysh.h"
+#include "parseEscapes.h"
 
-#define	DFL_PROMPT	"Command > "
+#define  DFL_PROMPT "\\033[1;34mShell\\033[0m \\h > "
 
 int main()
 {
@@ -18,7 +20,15 @@ int main()
    int	result;
    void	setup();
 
-   prompt = DFL_PROMPT;
+   char* promptStr  = getenv("PS1");
+   if (promptStr == NULL)
+   {
+      promptStr = malloc(strlen(DFL_PROMPT) + 1);
+      strcpy(promptStr, DFL_PROMPT);
+   }
+
+   prompt = parseEscapes(promptStr);
+
    setup();
 
    while ( (cmdline = next_cmd(prompt, stdin)) != NULL ){
@@ -32,13 +42,21 @@ int main()
 }
 
 /*
+ * purpose: handles signals by exiting.
+ * returns: nothing. Exits with signal number as status.
+ */
+void sigHandle (int sigNum){
+   exitShell(sigNum);
+}
+
+/*
  * purpose: initialize shell
  * returns: nothing.
  */
 void setup()
 {
-   signal(SIGINT, SIG_IGN);
-   signal(SIGQUIT, SIG_IGN);
+   signal(SIGINT, sigHandle);
+   signal(SIGQUIT, sigHandle);
 }
 
 
