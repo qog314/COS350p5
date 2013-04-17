@@ -26,7 +26,7 @@ int main()
       promptStr = malloc(strlen(DFL_PROMPT) + 1);
       strcpy(promptStr, DFL_PROMPT);
    }
-
+   // TODO Add warning flag, to prevent confusion.
    prompt = parseEscapes(promptStr);
 
    setup();
@@ -42,21 +42,13 @@ int main()
 }
 
 /*
- * purpose: handles signals by exiting.
- * returns: nothing. Exits with signal number as status.
- */
-void sigHandle (int sigNum){
-   exitShell(sigNum);
-}
-
-/*
  * purpose: initialize shell
  * returns: nothing.
  */
 void setup()
 {
-   signal(SIGINT, sigHandle);
-   signal(SIGQUIT, sigHandle);
+   signal(SIGINT, SIG_IGN);
+   signal(SIGQUIT, SIG_IGN);
 }
 
 
