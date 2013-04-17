@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "smsh.h"
+#include "mysh.h"
 
 char * next_cmd(char *prompt, FILE *fp)
 /*
