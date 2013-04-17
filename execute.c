@@ -29,7 +29,7 @@ int execute(char *argv[])
     exit(1);
   }
   else {
-    if ( wait(&child_info) == -1 )
+    if ( waitpid(pid, &child_info, 0) == -1 )
       perror("wait");
   }
   return child_info;

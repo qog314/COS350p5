@@ -10,40 +10,51 @@
 #include <signal.h>
 #include "mysh.h"
 
-#define	DFL_PROMPT	"> "
+#define	DFL_PROMPT	"Command > "
 
 int main()
 {
-  char	*cmdline, *prompt, **arglist;
-  int	result;
-  void	setup();
+   char	*cmdline, *prompt, **arglist;
+   int	result;
+   void	setup();
 
-  prompt = DFL_PROMPT ;
-  setup();
+   prompt = DFL_PROMPT;
+   setup();
 
-  while ( (cmdline = next_cmd(prompt, stdin)) != NULL ){
-    if ( (arglist = splitline(cmdline)) != NULL  ){
-      result = execute(arglist);
-      freelist(arglist);
-    }
-    free(cmdline);
-  }
-  return 0;
+   while ( (cmdline = next_cmd(prompt, stdin)) != NULL ){
+      if ( (arglist = splitline(cmdline)) != NULL  ){
+         result = execute(arglist);
+         freelist(arglist);
+      }
+      free(cmdline);
+   }
+   return 0;
 }
 
-void setup()
 /*
  * purpose: initialize shell
- * returns: nothing. calls fatal() if trouble
+ * returns: nothing.
  */
+void setup()
 {
-  signal(SIGINT,  SIG_IGN);
-  signal(SIGQUIT, SIG_IGN);
+   signal(SIGINT, SIG_IGN);
+   signal(SIGQUIT, SIG_IGN);
+}
+
+
+/*
+ * purpose: exits the shell with the given exit code.
+ * returns: nothing.
+ */
+void exitShell (int status)
+{
+   // TODO Kill all sub-threads to avoid zombies.
+   exit(status);
 }
 
 void fatal(char *s1, char *s2, int n)
 {
-  fprintf(stderr,"Error: %s,%s\n", s1, s2);
-  exit(n);
+   fprintf(stderr,"Error: %s,%s\n", s1, s2);
+   exit(n);
 }
 
