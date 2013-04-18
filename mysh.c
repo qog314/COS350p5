@@ -54,6 +54,16 @@ int main()
 
    while ( (cmdline = next_cmd(prompt, stdin)) != NULL ){
       background = parseCommand(cmdline, &arglist);
+
+// TODO Remove
+//printf("arglist: ");
+//int i = 0;
+//while (arglist[i] != NULL){
+//   printf("%s, ", arglist[i]);
+//   i++;
+//}
+//printf("\\0\n");
+
       result = execute(arglist);
       freeCmdbuf(arglist);
       free(cmdline);

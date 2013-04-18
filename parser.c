@@ -19,6 +19,14 @@ char* getPathFromHome();
 
 int parseCommand(const char* src, char*** argv)
 {
+   // Check if background task.
+   int srclen = strlen(src);
+   int background = NO;
+   if (src[srclen-1] == '&'){
+      background = YES;
+      srclen--;
+   }
+
    int buflen = CMD_BUF_LEN;
    int bufindex = 0;
    int cmdindex = 0;
@@ -31,7 +39,10 @@ int parseCommand(const char* src, char*** argv)
    char currchar;
    int newlen;
    int inQuote = NO;
-   while ((currchar = src[srcindex]) != '\0'){
+   while (srcindex < srclen){
+      // Get char.
+      currchar = src[srcindex];
+
       // Expand command buffer, if needed.
       if (cmdindex >= cmdlen - 1){
          newlen = cmdlen + CMD_BUF_LEN;
@@ -44,19 +55,21 @@ int parseCommand(const char* src, char*** argv)
 
       // Move to next command, if needed.
       if (currchar == ' ' && !inQuote){
-         cmdbuf[bufindex][cmdindex] = '\0';
-         bufindex++;
-         cmdindex = 0;
-         cmdlen = CMD_BUF_LEN;
-         if (bufindex >= buflen - 1){
-            newlen = buflen + CMD_BUF_LEN;
-            char** newbuf = malloc(sizeof(char*) * newlen);
-            memcpy(newbuf, cmdbuf, sizeof(char*) * buflen);
-            free(cmdbuf);
-            cmdbuf = newbuf;
-            buflen = newlen;
+         if (cmdindex != 0){
+            cmdbuf[bufindex][cmdindex] = '\0';
+            bufindex++;
+            cmdindex = 0;
+            cmdlen = CMD_BUF_LEN;
+            if (bufindex >= buflen - 1){
+               newlen = buflen + CMD_BUF_LEN;
+               char** newbuf = malloc(sizeof(char*) * newlen);
+               memcpy(newbuf, cmdbuf, sizeof(char*) * buflen);
+               free(cmdbuf);
+               cmdbuf = newbuf;
+               buflen = newlen;
+            }
+            cmdbuf[bufindex] = malloc (cmdlen);
          }
-         cmdbuf[bufindex] = malloc (cmdlen);
       }
 
       // Handle quotes
@@ -76,13 +89,18 @@ int parseCommand(const char* src, char*** argv)
    }
 
    // Add null terminators.
-   cmdbuf[bufindex][cmdindex] = '\0';
-   cmdbuf[bufindex + 1] = NULL;
+   if (cmdindex == 0){
+      free(cmdbuf[bufindex]);
+      cmdbuf[bufindex] = NULL;
+   }
+   else{
+      cmdbuf[bufindex][cmdindex] = '\0';
+      cmdbuf[bufindex + 1] = NULL;
+   }
 
    // Return values.
    *argv = cmdbuf;
-   // TODO Return background.
-   return NO;
+   return background;
 }
 
 void freeCmdbuf(char** cmdbuf)
