@@ -6,12 +6,13 @@
 #include <unistd.h>
 #include <signal.h>
 #include <sys/wait.h>
+#include "mysh.h"
 
 #define EXIT "exit"
 #define CD "cd"
 void changedir(char*);
 
-int execute(char *argv[])
+int execute(int background, char *argv[])
 /*
  * purpose: run a program passing it arguments
  * returns: status returned via wait, -1 on error,
@@ -49,7 +50,9 @@ int execute(char *argv[])
       exitShell(1);
    }
    else {
-      if ( waitpid(pid, &child_info, 0) == -1 )
+      if (background)
+         printf("Started process %d.\n", pid);
+      else if ( waitpid(pid, &child_info, 0) == -1 )
          perror("wait");
    }
    return child_info;

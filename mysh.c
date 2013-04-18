@@ -55,7 +55,7 @@ int main()
    while ( (cmdline = next_cmd(prompt, stdin)) != NULL ){
       cmdesc = parseEscapes(cmdline);
       background = parseCommand(cmdesc, &arglist);
-      result = execute(arglist);
+      result = execute(background, arglist);
       freeCmdbuf(arglist);
       free(cmdline);
       free(cmdesc);
