@@ -5,16 +5,84 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <errno.h>
-#include "parseEscapes.h"
+#include "parser.h"
 #include "mysh.h"
 
 #define BUF_MAX_LEN 255
+#define CMD_BUF_LEN 32
 
 int expandBuffer(char**, int, int);
 char* getHostName();
 char* getHostNameShort();
 char* getUserName();
 char* getPathFromHome();
+
+int parseCommand(const char* src, char** cmdbuf)
+{
+   int buflen = CMD_BUF_LEN;
+   int bufindex = 0;
+   int cmdindex = 0;
+   cmdbuf = malloc(sizeof(char*) * buflen);
+
+   int cmdlen = CMD_BUF_LEN;
+   cmdbuf[bufindex] = malloc (cmdlen);
+
+   int srcindex = 0;
+   char currchar;
+   int newlen;
+   int inQuote = NO;
+   while ((currchar = src[srcindex]) != '\0'){
+      // Expand buffer, if needed.
+      if (cmdindex >= cmdlen){
+         newlen = cmdlen + CMD_BUF_LEN;
+         char* newcmd = malloc(newlen);
+         memcpy(newcmd, cmdbuf[bufindex], cmdlen);
+         free(cmdbuf[bufindex]);
+         cmdbuf[bufindex] = newcmd;
+         cmdlen = newlen;
+      }
+
+      // Move to next command, if needed.
+      if (currchar == ' ' && !inQuote){
+         cmdbuf[bufindex][cmdindex] = '\0';
+         bufindex++;
+         cmdindex = 0;
+         cmdlen = CMD_BUF_LEN;
+         if (bufindex >= buflen){
+            newlen = buflen + CMD_BUF_LEN;
+            char** newbuf = malloc(sizeof(char*) * newlen);
+            memcpy(newbuf, cmdbuf, sizeof(char*) * buflen);
+            free(cmdbuf);
+            cmdbuf = newbuf;
+            buflen = newlen;
+         }
+         cmdbuf[bufindex] = malloc (cmdlen);
+      }
+
+      // Handle quotes
+      else if (currchar == '"'){
+         if (inQuote == YES) inQuote = NO;
+         else inQuote == YES;
+      }
+
+      // Write everything else.
+      else {
+         cmdbuf[bufindex][cmdindex] = currchar;
+      }
+
+      // Continue.
+      srcindex++;
+   }
+}
+
+void freeCmdbuf(char** cmdbuf)
+{
+   int index = 0;
+   while (cmdbuf[index] != NULL)
+      free(cmdbuf[index++]);
+
+   free(cmdbuf);
+}
 
 /* parseEscapes:
  * This function takes a string and parses escaped characters.

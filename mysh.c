@@ -10,7 +10,7 @@
 #include <signal.h>
 #include <string.h>
 #include "mysh.h"
-#include "parseEscapes.h"
+#include "parser.h"
 
 #define  DFL_PROMPT "\\033[1;33m\\u@\\h\\033[0m:\\033[1;34m\\w\\033[0m\\$ "
 #define  FORCE_DFL_PROMPT 0
@@ -73,6 +73,7 @@ void setup()
 {
    signal(SIGINT, SIG_IGN);
    signal(SIGQUIT, SIG_IGN);
+   signal(SIGQUIT, handleSigChild);
 }
 
 

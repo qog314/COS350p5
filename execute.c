@@ -55,6 +55,18 @@ int execute(char *argv[])
    return child_info;
 }
 
+void handleSigChild (int signum)
+{
+   int pid;
+   int status;
+
+   // Wait for all children that haven't exited.
+   while((pid = waitpid(-1, &status, WNOHANG)) > 0 ){
+      printf("Process %d exited with status %d.\n", pid, status);
+      // TODO Buffer output to display at appropriate time.
+   }
+}
+
 void changedir(char* dir)
 {
    char* buf;
