@@ -77,19 +77,19 @@ void changedir(char* dir)
       char* home = getenv("HOME");
       int homelen =  strlen(home);
       int buflen = homelen+dirlen;
-      buf = malloc(buflen + 1);
+      buf = (char*) emalloc(buflen + 1);
       memcpy(buf, home, homelen);
       memcpy(&buf[homelen], &dir[1], dirlen);
    }
    else if (dir[0] != '/'){
       char* pwd = getcwd(0,0);
       int pwdlen =  strlen(pwd);
-      buf = malloc(pwdlen + dirlen + 2);
+      buf = (char*) emalloc(pwdlen + dirlen + 2);
       memcpy(buf, pwd, pwdlen);
       buf[pwdlen] = '/';
       memcpy(&buf[pwdlen + 1], dir, dirlen + 1);
    } else {
-      buf = malloc(dirlen + 1);
+      buf = (char*) emalloc(dirlen + 1);
       memcpy(buf, dir, dirlen + 1);
    }
 

@@ -30,10 +30,10 @@ int parseCommand(const char* src, char*** argv)
    int buflen = CMD_BUF_LEN;
    int bufindex = 0;
    int cmdindex = 0;
-   char** cmdbuf = malloc(sizeof(char*) * buflen);
+   char** cmdbuf = (char**) emalloc(sizeof(char*) * buflen);
 
    int cmdlen = CMD_BUF_LEN;
-   cmdbuf[bufindex] = malloc (cmdlen);
+   cmdbuf[bufindex] = (char*) emalloc (cmdlen);
 
    int srcindex = 0;
    char currchar;
@@ -45,12 +45,8 @@ int parseCommand(const char* src, char*** argv)
 
       // Expand command buffer, if needed.
       if (cmdindex >= cmdlen - 1){
-         newlen = cmdlen + CMD_BUF_LEN;
-         char* newcmd = malloc(newlen);
-         memcpy(newcmd, cmdbuf[bufindex], cmdlen);
-         free(cmdbuf[bufindex]);
-         cmdbuf[bufindex] = newcmd;
-         cmdlen = newlen;
+         cmdlen += CMD_BUF_LEN;
+         cmdbuf[bufindex] = (char*) erealloc(cmdbuf[bufindex], cmdlen);
       }
 
       // Move to next command, if needed.
@@ -61,14 +57,10 @@ int parseCommand(const char* src, char*** argv)
             cmdindex = 0;
             cmdlen = CMD_BUF_LEN;
             if (bufindex >= buflen - 1){
-               newlen = buflen + CMD_BUF_LEN;
-               char** newbuf = malloc(sizeof(char*) * newlen);
-               memcpy(newbuf, cmdbuf, sizeof(char*) * buflen);
-               free(cmdbuf);
-               cmdbuf = newbuf;
-               buflen = newlen;
+               buflen += CMD_BUF_LEN;
+               cmdbuf = (char**) erealloc(cmdbuf, sizeof(char*) * buflen);
             }
-            cmdbuf[bufindex] = malloc (cmdlen);
+            cmdbuf[bufindex] = (char*) emalloc (cmdlen);
          }
       }
 
@@ -124,7 +116,7 @@ void freeCmdbuf(char** cmdbuf)
 char* parseEscapes(char *string)
 {
    int buflen = strlen(string) + 1;
-   char* buf = malloc(buflen);
+   char* buf = (char*) emalloc(buflen);
    if (buf == NULL)
       fatal("Malloc failed", "parseEscapes:buf", errno);
 
@@ -234,9 +226,7 @@ char* parseEscapes(char *string)
 
 int expandBuffer(char** buf, int origsize, int increase){
    int newsize = origsize + increase;
-   char* newbuf = malloc(newsize);
-   if (newbuf == NULL)
-      fatal("Malloc failed", "expandBuffer", errno);
+   char* newbuf = (char*) emalloc(newsize);
    memcpy(newbuf, *buf, origsize);
    free(*buf);
    *buf = newbuf;
@@ -245,9 +235,7 @@ int expandBuffer(char** buf, int origsize, int increase){
 
 char* getHostName()
 {
-   char* hostname = malloc(BUF_MAX_LEN + 1);
-   if (hostname == NULL)
-      fatal("Malloc failed", "getHostName", errno);
+   char* hostname = (char*) emalloc(BUF_MAX_LEN + 1);
    gethostname(hostname, BUF_MAX_LEN);
    hostname[BUF_MAX_LEN] = 0;
    return hostname;

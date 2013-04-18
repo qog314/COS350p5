@@ -26,12 +26,12 @@ int main()
    char* env  = getenv("PS1");
    if (FORCE_DFL_PROMPT || env == NULL)
    {
-      promptStr = malloc(strlen(DFL_PROMPT) + 1);
+      promptStr = (char*) emalloc(strlen(DFL_PROMPT) + 1);
       strcpy(promptStr, DFL_PROMPT);
    }
    else {
       int envlen = strlen(env);
-      promptStr = malloc(envlen + 1);
+      promptStr = (char*) emalloc(envlen + 1);
       memcpy(promptStr, env, envlen + 1);
    }
 
@@ -39,7 +39,7 @@ int main()
    if (DISPLAY_WARN){
       int warnlen = strlen(WARN_MSG);
       int promptlen = strlen(promptStr);
-      char* temp = malloc(warnlen + promptlen + 1);
+      char* temp = (char*) emalloc(warnlen + promptlen + 1);
       temp[0] = '\0';
       strcat(temp, WARN_MSG);
       strcat(temp, promptStr);
