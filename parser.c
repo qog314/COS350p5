@@ -11,7 +11,6 @@
 #define BUF_MAX_LEN 255
 #define CMD_BUF_LEN 32
 
-int expandBuffer(char**, int, int);
 char* getHostName();
 char* getHostNameShort();
 char* getUserName();
@@ -179,8 +178,8 @@ char* parseEscapes(char *string)
                tempstr = getHostNameShort();
 
             templen = strlen(tempstr);
-
-            buflen = expandBuffer(&buf, buflen, templen);
+            buflen += templen;
+            buf = (char*) erealloc(buf, buflen);
             memcpy(&buf[writeindex], tempstr, templen);
             writeindex += templen - 1;
             currchar = tempstr[templen - 1];
@@ -195,7 +194,8 @@ char* parseEscapes(char *string)
                tempstr = getPathFromHome();
 
             templen = strlen(tempstr);
-            buflen = expandBuffer(&buf, buflen, templen);
+            buflen += templen;
+            buf = (char*) erealloc(buf, buflen);
             memcpy(&buf[writeindex], tempstr, templen);
             writeindex += templen - 1;
             currchar = tempstr[templen - 1];
@@ -205,7 +205,8 @@ char* parseEscapes(char *string)
          case 'u': // Username
             tempstr = getUserName();
             templen = strlen(tempstr);
-            buflen = expandBuffer(&buf, buflen, templen);
+            buflen += templen;
+            buf = (char*) erealloc(buf, buflen);
             memcpy(&buf[writeindex], tempstr, templen);
             writeindex += templen - 1;
             currchar = tempstr[templen - 1];
@@ -222,15 +223,6 @@ char* parseEscapes(char *string)
    // Terminate string.
    buf[writeindex] = 0;
    return buf;
-}
-
-int expandBuffer(char** buf, int origsize, int increase){
-   int newsize = origsize + increase;
-   char* newbuf = (char*) emalloc(newsize);
-   memcpy(newbuf, *buf, origsize);
-   free(*buf);
-   *buf = newbuf;
-   return newsize;
 }
 
 char* getHostName()
