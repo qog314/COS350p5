@@ -19,7 +19,7 @@
 
 int main()
 {
-   char	*cmdline, *prompt, *promptStr, **arglist;
+   char	*cmdline, *cmdesc, *prompt, *promptStr, **arglist;
    int	result, background;
    void	setup();
 
@@ -53,7 +53,8 @@ int main()
    setup();
 
    while ( (cmdline = next_cmd(prompt, stdin)) != NULL ){
-      background = parseCommand(cmdline, &arglist);
+      cmdesc = parseEscapes(cmdline);
+      background = parseCommand(cmdesc, &arglist);
 
 // TODO Remove
 //printf("arglist: ");
@@ -67,6 +68,7 @@ int main()
       result = execute(arglist);
       freeCmdbuf(arglist);
       free(cmdline);
+      free(cmdesc);
 
       // Reparse the prompt, for escape characters such as \h.
       prompt = parseEscapes(promptStr);
