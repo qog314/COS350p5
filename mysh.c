@@ -20,7 +20,7 @@
 int main()
 {
    char	*cmdline, *prompt, *promptStr, **arglist;
-   int	result;
+   int	result, background;
    void	setup();
 
    char* env  = getenv("PS1");
@@ -53,10 +53,9 @@ int main()
    setup();
 
    while ( (cmdline = next_cmd(prompt, stdin)) != NULL ){
-      if ( (arglist = splitline(cmdline)) != NULL  ){
-         result = execute(arglist);
-         freelist(arglist);
-      }
+      background = parseCommand(cmdline, &arglist);
+      result = execute(arglist);
+      freeCmdbuf(arglist);
       free(cmdline);
 
       // Reparse the prompt, for escape characters such as \h.

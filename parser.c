@@ -17,12 +17,12 @@ char* getHostNameShort();
 char* getUserName();
 char* getPathFromHome();
 
-int parseCommand(const char* src, char** cmdbuf)
+int parseCommand(const char* src, char*** argv)
 {
    int buflen = CMD_BUF_LEN;
    int bufindex = 0;
    int cmdindex = 0;
-   cmdbuf = malloc(sizeof(char*) * buflen);
+   char** cmdbuf = malloc(sizeof(char*) * buflen);
 
    int cmdlen = CMD_BUF_LEN;
    cmdbuf[bufindex] = malloc (cmdlen);
@@ -32,8 +32,8 @@ int parseCommand(const char* src, char** cmdbuf)
    int newlen;
    int inQuote = NO;
    while ((currchar = src[srcindex]) != '\0'){
-      // Expand buffer, if needed.
-      if (cmdindex >= cmdlen){
+      // Expand command buffer, if needed.
+      if (cmdindex >= cmdlen - 1){
          newlen = cmdlen + CMD_BUF_LEN;
          char* newcmd = malloc(newlen);
          memcpy(newcmd, cmdbuf[bufindex], cmdlen);
@@ -48,7 +48,7 @@ int parseCommand(const char* src, char** cmdbuf)
          bufindex++;
          cmdindex = 0;
          cmdlen = CMD_BUF_LEN;
-         if (bufindex >= buflen){
+         if (bufindex >= buflen - 1){
             newlen = buflen + CMD_BUF_LEN;
             char** newbuf = malloc(sizeof(char*) * newlen);
             memcpy(newbuf, cmdbuf, sizeof(char*) * buflen);
@@ -60,19 +60,29 @@ int parseCommand(const char* src, char** cmdbuf)
       }
 
       // Handle quotes
-      else if (currchar == '"'){
+      else if (currchar == '\"'){
          if (inQuote == YES) inQuote = NO;
-         else inQuote == YES;
+         else inQuote = YES;
       }
 
       // Write everything else.
       else {
          cmdbuf[bufindex][cmdindex] = currchar;
+         cmdindex++;
       }
 
       // Continue.
       srcindex++;
    }
+
+   // Add null terminators.
+   cmdbuf[bufindex][cmdindex] = '\0';
+   cmdbuf[bufindex + 1] = NULL;
+
+   // Return values.
+   *argv = cmdbuf;
+   // TODO Return background.
+   return NO;
 }
 
 void freeCmdbuf(char** cmdbuf)
